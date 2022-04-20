@@ -21,6 +21,7 @@ runs:
       env:
         NPMRC: ${{ secrets.NPMRC }}
       run: echo "$NPMRC" > .npmrc
+      shell: bash
     - name: Install SSH Key
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       uses: shimataro/ssh-key-action@v2
@@ -30,24 +31,30 @@ runs:
     - name: NPM Install
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: npm install
+      shell: bash
     - name: Print debug logs
       if: ${{ failure() }}
       run: cat ~/.npm/_logs/*
+      shell: bash
 
     # Git push package-lock.json if someone forgot to push it
     - name: Git user identification
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: git config user.email "ghactions@debitoor.com" && git config user.name "GH Actions"
+      shell: bash
     - name: Checkout package.json
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: git checkout package.json
+      shell: bash
     - name: Git push
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: var=$(git status | grep package-lock.json | wc -l) && [ ! -z $var ] && git add package-lock.json && git commit -m "update pkg lock" && git push origin $GITHUB_REF_NAME || git status
+      shell: bash
 
     # Run test  
     - name: Test
       run: npm test
+      shell: bash
 
    # Collect results
     - name: Publish Unit Test Results
