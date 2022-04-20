@@ -1,5 +1,21 @@
 name: 'Ru NPM tests'
 description: 'Workflow to execute npm test command with MongoDB container running in the background'
+
+inputs:
+  gh-ssh-private-key:  # id of input
+    description: 'SSH private key'
+    required: true
+    default: ''
+  gh-ssh-known-hosts:  # id of input
+    description: 'SSH known hosts'
+    required: true
+    default: ''
+  npmrc:  # id of input
+    description: 'NPMRC'
+    required: true
+    default: ''
+
+
 runs:
   using: "composite"
   steps:
@@ -19,15 +35,15 @@ runs:
     - name: Create NPMRC
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       env:
-        NPMRC: ${{ secrets.NPMRC }}
+        NPMRC: ${{ inputs.npmrc }}
       run: echo "$NPMRC" > .npmrc
       shell: bash
     - name: Install SSH Key
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       uses: shimataro/ssh-key-action@v2
       with:
-        key: ${{ secrets.GH_SSH_PRIVATE_KEY }} 
-        known_hosts: ${{ secrets.KNOWN_HOSTS }}
+        key: ${{ inputs.gh-ssh-private-key }} 
+        known_hosts: ${{ inputs.gh-ssh-known-hosts }}
     - name: NPM Install
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: npm install
