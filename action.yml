@@ -1,5 +1,5 @@
-name: 'Ru NPM tests'
-description: 'Workflow to execute npm test command with MongoDB container running in the background'
+name: 'Run NPM tests'
+description: 'Workflow to execute npm script'
 
 inputs:
   gh-ssh-private-key:  # id of input
