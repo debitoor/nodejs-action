@@ -25,7 +25,7 @@ inputs:
   test-results-path:
     description: 'Path with XML test results'
     required: false
-    default: '**/mocha/*.xml'
+    default: '*.xml'
   npm-test-script:
     description: 'NPM script to be executed'
     required: false
