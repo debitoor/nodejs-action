@@ -97,3 +97,4 @@ runs:
       if: always()
       with:
         files: ${{ inputs.test-results-path }}
+        comment_mode: off
