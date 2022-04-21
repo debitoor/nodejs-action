@@ -41,6 +41,7 @@ runs:
     - name: Update NPM
       if: inputs.npm-version != ''
       run: npm i npm@${{ inputs.npm-version }} -g
+      shell: bash
 
     # Configure credentials
     - name: Create NPMRC
