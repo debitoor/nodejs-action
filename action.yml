@@ -26,7 +26,10 @@ inputs:
     description: 'Path with XML test results'
     required: false
     default: '**/mocha/*.xml'
-
+  npm-test-script:
+    description: 'NPM script to be executed'
+    required: false
+    default: 'test'
 
 runs:
   using: "composite"
@@ -85,7 +88,7 @@ runs:
 
     # Run test  
     - name: Test
-      run: npm test
+      run: npm ${{ inputs.npm-test-script }}
       shell: bash
 
    # Collect results
