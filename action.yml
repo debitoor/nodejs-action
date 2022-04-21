@@ -22,6 +22,10 @@ inputs:
     description: 'NPM Version'
     required: false
     default: ''
+  test-results-path:
+    description: 'Path with XML test results'
+    required: false
+    default: '**/mocha/*.xml'
 
 
 runs:
@@ -89,4 +93,4 @@ runs:
       uses: EnricoMi/publish-unit-test-result-action@v1
       if: always()
       with:
-        files: '**/mocha/*.xml'
+        files: ${{ inputs.test-results-path }}
