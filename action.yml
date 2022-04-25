@@ -2,26 +2,16 @@ name: 'Run NPM tests'
 description: 'Workflow to execute npm script'
 
 inputs:
-  gh-ssh-private-key:
-    description: 'SSH private key'
-    required: true
-    default: ''
-  gh-ssh-known-hosts:
-    description: 'SSH known hosts'
-    required: true
-    default: ''
   npmrc:
     description: 'NPMRC'
     required: true
-    default: ''
-  node-version:
-    description: 'Node Version'
+  gh-ssh-private-key:
+    description: 'SSH private key'
     required: false
-    default: '14'
-  npm-version:
-    description: 'NPM Version'
+  gh-ssh-known-hosts:
+    description: 'SSH known hosts'
     required: false
-    default: ''
+
   test-results-path:
     description: 'Path with XML test results'
     required: false
@@ -29,11 +19,9 @@ inputs:
   pre-workflow-command:
     description: 'Command to be executed before workflow'
     required: false
-    default: ''
   pre-test-command:
     description: 'Command to be executed before NPM test'
     required: false
-    default: ''
   npm-test-script:
     description: 'NPM script to be executed'
     required: false
@@ -49,10 +37,17 @@ runs:
       shell: bash
 
     - uses: actions/checkout@v3
+    - id: determine-node-npm-version
+      run: |
+        NODE_VERSION=$(jq '.engines.node' ./package.json)
+        echo "::set-output name=node-version::${NODE_VERSION/null/14}"
+        NPM_VERSION=$(jq '.engines.npm' ./package.json)
+        echo "::set-output name=npm-version::${NPM_VERSION/null/}"
+      shell: bash
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: ${{ inputs.node-version }}
+        node-version: ${{ steps.determine-node-npm-version.outputs.node-version }}
         cache: 'npm'
     - uses: actions/cache@v2
       id: cache-node-modules
@@ -60,8 +55,8 @@ runs:
         path: 'node_modules'
         key: ${{ runner.os }}-modules-${{ hashFiles('package.json') }}
     - name: Update NPM
-      if: inputs.npm-version != ''
-      run: npm i npm@${{ inputs.npm-version }} -g
+      if: steps.determine-node-npm-version.npm-version != ''
+      run: npm i npm@${{ steps.determine-node-npm-version.outputs.npm-version }} -g
       shell: bash
 
     # Configure credentials
@@ -72,7 +67,7 @@ runs:
       run: echo "$NPMRC" > .npmrc
       shell: bash
     - name: Install SSH Key
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      if: steps.cache-node-modules.outputs.cache-hit != 'true' && inputs.gh-ssh-private-key != ''
       uses: shimataro/ssh-key-action@v2
       with:
         key: ${{ inputs.gh-ssh-private-key }} 
