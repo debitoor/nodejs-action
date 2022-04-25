@@ -1,5 +1,5 @@
-name: 'Run NPM tests'
-description: 'Workflow to execute npm script'
+name: 'Run NPM install'
+description: 'Workflow to execute npm install script'
 
 inputs:
   npmrc:
@@ -12,30 +12,10 @@ inputs:
     description: 'SSH known hosts'
     required: false
 
-  test-results-path:
-    description: 'Path with XML test results'
-    required: false
-    default: '*.xml'
-  pre-workflow-command:
-    description: 'Command to be executed before workflow'
-    required: false
-  pre-test-command:
-    description: 'Command to be executed before NPM test'
-    required: false
-  npm-test-script:
-    description: 'NPM script to be executed'
-    required: false
-    default: 'test'
 
 runs:
   using: "composite"
   steps:
-    # Run pre workflow command 
-    - name: Pre-workflow command
-      if: inputs.pre-workflow-command != ''
-      run: ${{ inputs.pre-workflow-command }}
-      shell: bash
-
     - uses: actions/checkout@v3
     - id: determine-node-npm-version
       run: |
@@ -94,22 +74,3 @@ runs:
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: var=$(git status | grep package-lock.json | wc -l) && [ ! -z $var ] && git add package-lock.json && git commit -m "update pkg lock" && git push origin $GITHUB_REF_NAME || git status
       shell: bash
-
-    # Run pre test script  
-    - name: Pre-Test command
-      if: inputs.pre-test-command != ''
-      run: ${{ inputs.pre-test-command }}
-      shell: bash
-
-    # Run test  
-    - name: Test
-      run: npm ${{ inputs.npm-test-script }}
-      shell: bash
-
-   # Collect results
-    - name: Publish Unit Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v1
-      if: always()
-      with:
-        files: ${{ inputs.test-results-path }}
-        comment_mode: off

@@ -1,0 +1,48 @@
+name: 'Build and push Docker image'
+description: 'Workflow to build and push Docker image to AWS ECR'
+
+inputs:
+  aws-access-key-id:
+    description: 'AWS Access Key ID'
+    required: true
+  aws-secret-access-key:
+    description: 'AWS Secret Access Key'
+    required: true
+  aws-ecr-registry:
+    description: 'AWS ECR registry'
+    required: true
+  npmrc:
+    description: 'npmrc. Text or base64 encoded'
+    required: true
+  gh-ssh-private-key-b64:
+    description: 'Base64 encoded GH private key'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v2
+    - name: Login to AWS ECR Registry
+      uses: docker/login-action@v1 
+      with:
+        username: ${{ inputs.aws-access-key-id }}
+        password: ${{ inputs.aws-secret-access-key }}
+        registry: ${{ inputs.aws-ecr-registry }}  
+    - name: Display image tag (git-sha)
+      run: |
+        echo "tag: ${GITHUB_SHA}"
+      shell: bash
+    - name: Build and push
+      env:
+        ECR_REPOSITORY: ${{ github.event.repository.name }} # NOTE: this is not populated for scheduled jobs
+      uses: docker/build-push-action@v2
+      with:
+        push: false
+        build-args: |
+          NPMRC=${{ inputs.npmrc }}
+          ssh_prv_key=${{ inputs.gh-ssh-private-key-b64 }}
+        tags: ${{ inputs.aws-ecr-registry }}/${{ env.ECR_REPOSITORY }}:${{ github.sha }}
+    - name: List Docker images
+      run: docker images
+      shell: bash
+      
