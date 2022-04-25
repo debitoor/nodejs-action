@@ -39,9 +39,9 @@ runs:
     - uses: actions/checkout@v3
     - id: determine-node-npm-version
       run: |
-        NODE_VERSION=$(jq '.engines.node' ./package.json)
+        NODE_VERSION=$(jq -r '.engines.node' ./package.json)
         echo "::set-output name=node-version::${NODE_VERSION/null/14}"
-        NPM_VERSION=$(jq '.engines.npm' ./package.json)
+        NPM_VERSION=$(jq -r '.engines.npm' ./package.json)
         echo "::set-output name=npm-version::${NPM_VERSION/null/}"
       shell: bash
     - name: Use Node.js
