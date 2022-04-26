@@ -35,7 +35,7 @@ runs:
         path: 'node_modules'
         key: ${{ runner.os }}-modules-${{ hashFiles('package.json') }}
     - name: Update NPM
-      if: steps.determine-node-npm-version.npm-version != ''
+      if: steps.determine-node-npm-version.outputs.npm-version != ''
       run: npm i npm@${{ steps.determine-node-npm-version.outputs.npm-version }} -g
       shell: bash
 
