@@ -57,11 +57,11 @@ runs:
         key: ${{ inputs.gh-ssh-private-key }} 
         known_hosts: ${{ inputs.gh-ssh-known-hosts }}
     - name: NPM Install
-      if: steps.cache-node-modules.outputs.cache-hit != 'true' && npm-ci-install == 'false'
+      if: steps.cache-node-modules.outputs.cache-hit != 'true' && inputs.npm-ci-install == 'false'
       run: npm install
       shell: bash
     - name: NPM CI
-      if: steps.cache-node-modules.outputs.cache-hit != 'true' && npm-ci-install == 'true'
+      if: steps.cache-node-modules.outputs.cache-hit != 'true' && inputs.npm-ci-install == 'true'
       run: npm ci
       shell: bash
     - name: Print debug logs
