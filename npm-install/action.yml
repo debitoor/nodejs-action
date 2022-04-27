@@ -80,5 +80,5 @@ runs:
       shell: bash
     - name: Git push
       if: steps.cache-node-modules.outputs.cache-hit != 'true'
-      run: var=$(git status | grep package-lock.json | wc -l) && [ ! -z $var ] && git add package-lock.json && git commit -m "update pkg lock" && git push origin $GITHUB_REF_NAME || git status
+      run: var=$(git status | grep package-lock.json | wc -l) && [ ! -z $var ] && git add package-lock.json && git commit -m "update pkg lock" && git push origin $GITHUB_HEAD_REF || git status
       shell: bash
