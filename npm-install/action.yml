@@ -29,6 +29,11 @@ runs:
       with:
         node-version: ${{ steps.determine-node-npm-version.outputs.node-version }}
         cache: 'npm'
+    - name: Use Node.js
+      if: ${{ failure() }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ steps.determine-node-npm-version.outputs.node-version }}
     - uses: actions/cache@v2
       id: cache-node-modules
       with:
