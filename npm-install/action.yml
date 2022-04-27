@@ -11,6 +11,10 @@ inputs:
   gh-ssh-known-hosts:
     description: 'SSH known hosts'
     required: false
+  npm-ci-install:
+    description: 'Run cpm ci instead of npm i'
+    required: false
+    default: 'false'
 
 
 runs:
@@ -53,8 +57,12 @@ runs:
         key: ${{ inputs.gh-ssh-private-key }} 
         known_hosts: ${{ inputs.gh-ssh-known-hosts }}
     - name: NPM Install
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      if: steps.cache-node-modules.outputs.cache-hit != 'true' && npm-ci-install == 'false'
       run: npm install
+      shell: bash
+    - name: NPM CI
+      if: steps.cache-node-modules.outputs.cache-hit != 'true' && npm-ci-install == 'true'
+      run: npm ci
       shell: bash
     - name: Print debug logs
       if: ${{ failure() }}
