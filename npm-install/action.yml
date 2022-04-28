@@ -41,6 +41,7 @@ runs:
           node_modules
           !node_modules/**/node_modules
           **/node_modules
+          ~/.cache/Cypress
         key: ${{ runner.os }}-modules-${{ hashFiles('package.json') }}
     - name: Update NPM
       if: steps.determine-node-npm-version.outputs.npm-version != ''
@@ -72,10 +73,10 @@ runs:
       if: ${{ failure() }}
       run: cat ~/.npm/_logs/*
       shell: bash
-    # - name: NPM postinstall script
-    #   if: steps.determine-node-npm-version.outputs.npm-postinstall != ''
-    #   run: npm run postinstall
-    #   shell: bash
+    - name: NPM postinstall script
+      if: steps.determine-node-npm-version.outputs.npm-postinstall != ''
+      run: npm run postinstall
+      shell: bash
 
     # Git push package-lock.json if someone forgot to push it
     - name: Git user identification
