@@ -26,6 +26,8 @@ runs:
         echo "::set-output name=node-version::${NODE_VERSION/null/14}"
         NPM_VERSION=$(jq -r '.engines.npm' ./package.json)
         echo "::set-output name=npm-version::${NPM_VERSION/null/}"
+        NPM_POSTINSTALL=$(jq -r '.scripts.postinstall' ./package.json)
+        echo "::set-output name=npm-postinstall::${NPM_POSTINSTALL/null/}"
       shell: bash
     - name: Use Node.js
       uses: actions/setup-node@v3
@@ -69,6 +71,10 @@ runs:
     - name: Print debug logs
       if: ${{ failure() }}
       run: cat ~/.npm/_logs/*
+      shell: bash
+    - name: NPM postinstall script
+      if: steps.determine-node-npm-version.outputs.npm-postinstall != ''
+      run: npm postinstall
       shell: bash
 
     # Git push package-lock.json if someone forgot to push it
