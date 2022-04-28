@@ -74,7 +74,7 @@ runs:
       shell: bash
     - name: NPM postinstall script
       if: steps.determine-node-npm-version.outputs.npm-postinstall != ''
-      run: npm postinstall
+      run: npm run postinstall
       shell: bash
 
     # Git push package-lock.json if someone forgot to push it
