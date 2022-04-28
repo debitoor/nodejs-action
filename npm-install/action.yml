@@ -50,13 +50,12 @@ runs:
 
     # Configure credentials
     - name: Create NPMRC
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
       env:
         NPMRC: ${{ inputs.npmrc }}
       run: echo "$NPMRC" > .npmrc
       shell: bash
     - name: Install SSH Key
-      if: inputs.gh-ssh-private-key != '' && steps.cache-node-modules.outputs.cache-hit != 'true'
+      if: inputs.gh-ssh-private-key != ''
       uses: shimataro/ssh-key-action@v2
       with:
         key: ${{ inputs.gh-ssh-private-key }} 
