@@ -37,7 +37,8 @@ runs:
       with:
         path: |
           node_modules
-          packages/*/*/node_modules
+          !node_modules/**/node_modules
+          **/node_modules
         key: ${{ runner.os }}-modules-${{ hashFiles('package.json') }}
     - name: Update NPM
       if: steps.determine-node-npm-version.outputs.npm-version != ''
