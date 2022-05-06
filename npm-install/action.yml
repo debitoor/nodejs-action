@@ -73,7 +73,7 @@ runs:
       run: cat ~/.npm/_logs/*
       shell: bash
     - name: NPM postinstall script
-      if: steps.determine-node-npm-version.outputs.npm-postinstall != ''
+      if: steps.determine-node-npm-version.outputs.npm-postinstall != '' && steps.cache-node-modules.outputs.cache-hit == 'true'
       run: npm run postinstall
       shell: bash
 
