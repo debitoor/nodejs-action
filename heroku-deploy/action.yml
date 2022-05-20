@@ -1,0 +1,28 @@
+name: 'Deploy to Heroku'
+description: 'Workflow to trigger build in Heroku'
+
+inputs:
+  heroku-app-name:
+    description: 'Heroku app name'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+        heroku_app_name: ${{ inputs.heroku-app-name }}
+        heroku_email: 'bob@debitoor.com'
+        justlogin: true
+    - run: heroku git:remote -r heroku -a ${{ inputs.heroku-app-name }}
+      shell: bash
+    # Push to Heroku git, git always write to stderr so redirect it to stdout and then to file and run in background
+    - run: git push -f heroku $GITHUB_REF_NAME:master > temp 2>&1 &
+      shell: bash
+    # Wait for Heroku response that build process has been started (exit grep after first match)
+    - run: grep -m 1 -i "building" <(tail -f -n 1000 temp) 
+      shell: bash
