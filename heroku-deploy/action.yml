@@ -5,6 +5,9 @@ inputs:
   heroku-app-name:
     description: 'Heroku app name'
     required: true
+  heroku-api-key:
+    description: 'Heroku API key'
+    required: true
 
 runs:
   using: "composite"
@@ -14,7 +17,7 @@ runs:
         fetch-depth: 0
     - uses: akhileshns/heroku-deploy@v3.12.12
       with:
-        heroku_api_key: ${{secrets.HEROKU_API_KEY}}
+        heroku_api_key: ${{ inputs.heroku-api-key}}
         heroku_app_name: ${{ inputs.heroku-app-name }}
         heroku_email: 'bob@debitoor.com'
         justlogin: true
