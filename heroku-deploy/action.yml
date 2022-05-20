@@ -8,6 +8,10 @@ inputs:
   heroku-api-key:
     description: 'Heroku API key'
     required: true
+  heroku-email:
+    description: 'Email'
+    required: false
+    default: bob@debitoor.com
 
 runs:
   using: "composite"
@@ -19,7 +23,7 @@ runs:
       with:
         heroku_api_key: ${{ inputs.heroku-api-key}}
         heroku_app_name: ${{ inputs.heroku-app-name }}
-        heroku_email: 'bob@debitoor.com'
+        heroku_email: ${{ inputs.heroku-email }}
         justlogin: true
     - run: heroku git:remote -r heroku -a ${{ inputs.heroku-app-name }}
       shell: bash
