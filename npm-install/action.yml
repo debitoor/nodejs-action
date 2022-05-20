@@ -79,14 +79,14 @@ runs:
 
     # Git push package-lock.json if someone forgot to push it
     - name: Git user identification
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      # if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: git config user.email "ghactions@debitoor.com" && git config user.name "GH Actions"
       shell: bash
     - name: Checkout package.json
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      # if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: git checkout package.json
       shell: bash
     - name: Git push
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      # if: steps.cache-node-modules.outputs.cache-hit != 'true'
       run: var=$(git status | grep package-lock.json | wc -l) && [ ! -z $var ] && git fetch --unshallow && git add package-lock.json && git commit -m "update pkg lock" && git push origin $GITHUB_HEAD_REF || git status
       shell: bash
