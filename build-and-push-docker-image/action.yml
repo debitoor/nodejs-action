@@ -33,7 +33,7 @@ runs:
         ECR_REPOSITORY: ${{ github.event.repository.name }} # NOTE: this is not populated for scheduled jobs
       uses: docker/build-push-action@v2
       with:
-        push: false
+        push: true
         build-args: |
           NPMRC=${{ inputs.npmrc }}
           ssh_prv_key=${{ inputs.gh-ssh-private-key-b64 }}
