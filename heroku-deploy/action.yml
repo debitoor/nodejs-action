@@ -31,5 +31,5 @@ runs:
     - run: git push -f heroku $GITHUB_REF_NAME:master > temp 2>&1 &
       shell: bash
     # Wait for Heroku response that build process has been started (exit grep after first match)
-    - run: grep -m 1 -i "building" <(tail -f -n 1000 temp) 
+    - run: grep -m 1 -E -i "(building)|(Everything up-to-date)" <(tail -f -n 1000 temp) 
       shell: bash
