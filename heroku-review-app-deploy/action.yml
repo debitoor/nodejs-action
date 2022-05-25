@@ -1,0 +1,100 @@
+name: 'Deploy Heroku review app'
+description: 'Workflow to trigger build in Heroku'
+
+inputs:
+  heroku-app-name:
+    description: 'Heroku app name'
+    required: true
+  heroku-api-key:
+    description: 'Heroku API key'
+    required: true
+  heroku-email:
+    description: 'Email'
+    required: false
+    default: bob@debitoor.com
+  heroku-buildpacks:
+    description: Buildpacks list to be set for app
+    required: false
+  heroku-source-app:
+    description: App to copy config from
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: ${{ github.event.action == 'closed' && 1 || 0 }}
+        ref: ${{ github.event.action != 'closed' && github.head_ref || '' }}
+
+    - name: Generate review app name
+      run: echo "::set-output name=heroku-app-name::review-${{ steps.review-app-name.outputs.heroku-app-name }}-${{ github.event.number }}"
+      id: review-app-name
+      shell: bash
+
+    - name: Login to Heroku
+      uses: akhileshns/heroku-deploy@v3.12.12
+      with:
+        heroku_api_key: ${{ inputs.heroku-api-key }}
+        heroku_app_name: ${{ steps.review-app-name.outputs.heroku-app-name }}
+        heroku_email: ${{ inputs.heroku-email }}@debitoor.com
+        justlogin: true
+    
+    - name: Create Heroku app
+      if: github.event.label.name == 'review-app'
+      run: heroku apps:create -t debitoor --region "eu" ${{ steps.review-app-name.outputs.heroku-app-name }} 
+      shell: bash
+      
+    - name: Set app buildpacks
+      run: index=0; while read buildpack; do heroku buildpacks:set -i "$((index+=1))" -a ${{ steps.review-app-name.outputs.heroku-app-name }} "$buildpack"; done < <(echo ${{ inputs.heroku-buildpacks }} | tr ',' '\n')
+      if: inputs.heroku-buildpacks != ''
+      shell: bash
+
+    - name: Add Heroku app to pipeline
+      if: ${{ github.event.label.name == 'review-app' }}
+      run: heroku pipelines:add ${{ inputs.heroku-app-name }} --app=${{ steps.review-app-name.outputs.heroku-app-name }} --stage=development
+      shell: bash
+
+    - name: Copy environment variables to Heroku app
+      if: ${{ github.event.label.name == 'review-app' }}
+      run: |
+        heroku config --shell --app=${{ inputs.heroku-source-app }} > .env
+        cat .env | tr '\n' ' ' | xargs heroku config:set --app=${{ steps.review-app-name.outputs.heroku-app-name }}
+      shell: bash
+
+    - name: Add Heroku Git remote
+      run: heroku git:remote -r heroku -a ${{ steps.review-app-name.outputs.heroku-app-name }}
+      if: ${{ github.event.label.name == 'review-app' }}
+      shell: bash
+
+    - name: Report branch to be pushed
+      run: echo "Pushing from $GITHUB_HEAD_REF"
+      if: ${{ github.event.action != 'closed' && contains(github.event.pull_request.labels.*.name, 'review-app')}}
+      shell: bash
+
+    # Push to Heroku git, git always write to stderr so redirect it to stdout and then to file and run in background
+    - name: Push to Heroku Git
+      run: git push -f heroku $GITHUB_HEAD_REF:master > temp 2>&1 &
+      if: ${{ github.event.action != 'closed' && contains(github.event.pull_request.labels.*.name, 'review-app')}}
+      shell: bash
+
+    # Wait for Heroku response that build process has been started (exit grep after first match)
+    - name: Wait for deployment to start
+      run: |
+        tail -f -n 1000 temp &
+        grep -m 1 -E -i "(building)|(Everything up-to-date)|(failed to push)" <(tail -f -n 1000 temp) 
+      if: ${{ github.event.action != 'closed' && contains(github.event.pull_request.labels.*.name, 'review-app')}}
+      shell: bash
+
+    - name: Add comment to PR
+      if: ${{ github.event.label.name == 'review-app' }}
+      run: |
+        gh pr comment ${{ github.event.number }} --body '[Heroku app](https://dashboard.heroku.com/apps/${{ steps.review-app-name.outputs.heroku-app-name }}): https://${{ steps.review-app-name.outputs.heroku-app-name }}.herokuapp.com'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      shell: bash
+
+    - name: Destroy Heroku app
+      if: github.event.action == 'closed'
+      run: heroku apps:destroy --app=${{ steps.review-app-name.outputs.heroku-app-name }} --confirm=${{ steps.review-app-name.outputs.heroku-app-name }}
+      shell: bash

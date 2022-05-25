@@ -25,11 +25,23 @@ runs:
         heroku_app_name: ${{ inputs.heroku-app-name }}
         heroku_email: ${{ inputs.heroku-email }}
         justlogin: true
-    - run: heroku git:remote -r heroku -a ${{ inputs.heroku-app-name }}
+        
+    - name: Add Heroku Git remote
+      run: heroku git:remote -r heroku -a ${{ inputs.heroku-app-name }}
       shell: bash
+
+    - name: Report branch to be pushed
+      run: echo "Pushing from $GITHUB_HEAD_REF"
+      shell: bash
+
     # Push to Heroku git, git always write to stderr so redirect it to stdout and then to file and run in background
-    - run: git push -f heroku $GITHUB_REF_NAME:master > temp 2>&1 &
+    - name: Push to Heroku Git
+      run: git push -f heroku $GITHUB_HEAD_REF:master > temp 2>&1 &
       shell: bash
+
     # Wait for Heroku response that build process has been started (exit grep after first match)
-    - run: grep -m 1 -E -i "(building)|(Everything up-to-date)" <(tail -f -n 1000 temp) 
+    - name: Wait for deployment to start
+      run: |
+        tail -f -n 1000 temp &
+        grep -m 1 -E -i "(building)|(Everything up-to-date)|(failed to push)" <(tail -f -n 1000 temp) 
       shell: bash
