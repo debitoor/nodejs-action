@@ -12,9 +12,6 @@ inputs:
     description: 'Email'
     required: false
     default: bob@debitoor.com
-  heroku-buildpacks:
-    description: Buildpacks list to be set for app
-    required: false
   heroku-config-source-app:
     description: App to copy config from
     required: true
@@ -51,8 +48,8 @@ runs:
       shell: bash
       
     - name: Set app buildpacks
-      run: index=0; while read buildpack; do heroku buildpacks:set -i "$((index+=1))" -a ${{ steps.review-app-name.outputs.heroku-app-name }} "$buildpack"; done < <(echo ${{ inputs.heroku-buildpacks }} | tr ',' '\n')
-      if: ${{ github.event.label.name == 'review-app' && inputs.heroku-buildpacks != '' }}
+      run: index=0; while read buildpack; do heroku buildpacks:set -i "$((index+=1))" -a ${{ steps.review-app-name.outputs.heroku-app-name }} "$buildpack"; done < <([ -f app.json ] && jq -r '.buildpacks[].url' ./app.json | tr ',' '\n')
+      if: ${{ github.event.label.name == 'review-app'  }}
       shell: bash
 
     - name: Add Heroku app to pipeline
