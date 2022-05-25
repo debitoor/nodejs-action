@@ -18,6 +18,9 @@ inputs:
   heroku-config-source-app:
     description: App to copy config from
     required: true
+  github-token:
+    description: GH token to update PR with link to review app
+    required: true
 
 runs:
   using: "composite"
@@ -92,8 +95,8 @@ runs:
       if: ${{ github.event.label.name == 'review-app' }}
       run: |
         gh pr comment ${{ github.event.number }} --body '[Heroku app](https://dashboard.heroku.com/apps/${{ steps.review-app-name.outputs.heroku-app-name }}): https://${{ steps.review-app-name.outputs.heroku-app-name }}.herokuapp.com'
-      # env:
-      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
       shell: bash
 
     - name: Destroy Heroku app
