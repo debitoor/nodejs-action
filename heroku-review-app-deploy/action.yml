@@ -15,7 +15,7 @@ inputs:
   heroku-buildpacks:
     description: Buildpacks list to be set for app
     required: false
-  heroku-source-app:
+  heroku-config-source-app:
     description: App to copy config from
     required: true
 
@@ -58,7 +58,7 @@ runs:
     - name: Copy environment variables to Heroku app
       if: ${{ github.event.label.name == 'review-app' }}
       run: |
-        heroku config --shell --app=${{ inputs.heroku-source-app }} > .env
+        heroku config --shell --app=${{ inputs.heroku-config-source-app }} > .env
         cat .env | tr '\n' ' ' | xargs heroku config:set --app=${{ steps.review-app-name.outputs.heroku-app-name }}
       shell: bash
 
