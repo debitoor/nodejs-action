@@ -41,13 +41,13 @@ runs:
         justlogin: true
     
     - name: Create Heroku app
-      if: github.event.label.name == 'review-app'
+      if: ${{ github.event.label.name == 'review-app' }}
       run: heroku apps:create -t debitoor --region "eu" ${{ steps.review-app-name.outputs.heroku-app-name }} 
       shell: bash
       
     - name: Set app buildpacks
       run: index=0; while read buildpack; do heroku buildpacks:set -i "$((index+=1))" -a ${{ steps.review-app-name.outputs.heroku-app-name }} "$buildpack"; done < <(echo ${{ inputs.heroku-buildpacks }} | tr ',' '\n')
-      if: inputs.heroku-buildpacks != ''
+      if: ${{ github.event.label.name == 'review-app' && inputs.heroku-buildpacks != '' }}
       shell: bash
 
     - name: Add Heroku app to pipeline
