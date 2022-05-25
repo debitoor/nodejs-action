@@ -90,8 +90,8 @@ runs:
       if: ${{ github.event.label.name == 'review-app' }}
       run: |
         gh pr comment ${{ github.event.number }} --body '[Heroku app](https://dashboard.heroku.com/apps/${{ steps.review-app-name.outputs.heroku-app-name }}): https://${{ steps.review-app-name.outputs.heroku-app-name }}.herokuapp.com'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # env:
+      #   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       shell: bash
 
     - name: Destroy Heroku app
