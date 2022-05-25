@@ -28,7 +28,7 @@ runs:
         ref: ${{ github.event.action != 'closed' && github.head_ref || '' }}
 
     - name: Generate review app name
-      run: echo "::set-output name=heroku-app-name::review-${{ inputs.heroku-app-name }}-${{ github.event.number }}"
+      run: echo "::set-output name=heroku-app-name::review-${${{ inputs.heroku-app-name }}:0:15}-${{ github.event.number }}"
       id: review-app-name
       shell: bash
 
