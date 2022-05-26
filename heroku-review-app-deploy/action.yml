@@ -61,7 +61,7 @@ runs:
       if: ${{ github.event.label.name == 'review-app' }}
       run: |
         heroku config --shell --app=${{ inputs.heroku-config-source-app }} > .env
-        while read line; do heroku config:set --app=${{ steps.review-app-name.outputs.heroku-app-name }} ${line//|/\\n}; done < <(cat .env | grep -v "HEROKU_" | sed 's/\\n/\|/g' | sed s/\'//g | sed 's/"//g') > /dev/null
+        cat .env | tr '\n' '\0' | sed 's/\\n/\n/g' | tr -d "'" | tr -d '"' | xargs -n1 -0 heroku config:set --app=${{ steps.review-app-name.outputs.heroku-app-name }}
       shell: bash
 
     - name: Add Heroku Git remote
