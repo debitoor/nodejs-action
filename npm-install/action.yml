@@ -85,7 +85,7 @@ runs:
 
     - name: Configure git username
       if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
-      run: git config user.email "ghactions@mku.com" && git config user.name "GH Actions"
+      run: git config user.email "ghactions@debitoor.com" && git config user.name "GH Actions"
       shell: bash
 
     - name: Stash package-lock.json
