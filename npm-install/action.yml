@@ -77,16 +77,44 @@ runs:
       run: npm run postinstall
       shell: bash
 
-    # Git push package-lock.json if someone forgot to push it
-    - name: Git user identification
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
-      run: git config user.email "ghactions@debitoor.com" && git config user.name "GH Actions"
+    # Update package-lock.json as artifact if someone forgot to push it
+    - name: Check if package-lock.json has updates
+      id: package-lock-status
+      run: echo "::set-output name=package-changed::$(git status | grep package-lock.json | wc -l)" 
       shell: bash
-    - name: Checkout package.json
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
-      run: git checkout package.json
+
+    - name: Configure git username
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
+      run: git config user.email "ghactions@mku.com" && git config user.name "GH Actions"
       shell: bash
+
+    - name: Stash package-lock.json
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1'}}
+      run: git stash -u
+      shell: bash
+
+    - name: Checkout branch
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Pop package-lock.json
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
+      run: git stash pop
+      shell: bash
+
+    - name: Add package-lock.json
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
+      run: git add package-lock.json
+      shell: bash
+
+    - name: Git commit
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
+      run: git commit -m "Updated package-lock.json"
+      shell: bash
+
     - name: Git push
-      if: steps.cache-node-modules.outputs.cache-hit != 'true'
-      run: var=$(git status | grep package-lock.json | wc -l) && [ ! -z $var ] && git switch $GITHUB_HEAD_REF && git add package-lock.json && git commit -m "update pkg lock" && git push origin $GITHUB_HEAD_REF || git status
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
+      run: git push origin HEAD:$GITHUB_HEAD_REF
       shell: bash
