@@ -22,6 +22,7 @@ runs:
     - uses: actions/checkout@v3
       with:
         ref: ${{ github.head_ref }}
+        ssh-key: ${{ inputs.gh-ssh-private-key }}
     - id: determine-node-npm-version
       run: |
         NODE_VERSION=$(jq -r '.engines.node' ./package.json)
