@@ -19,11 +19,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # - uses: actions/checkout@v3
-    - name: Checkout branch
-      uses: actions/checkout@v3
-      with:
-        ref: ${{ github.event.pull_request.head.sha }}
+    - uses: actions/checkout@v3
     - id: determine-node-npm-version
       run: |
         NODE_VERSION=$(jq -r '.engines.node' ./package.json)
@@ -92,21 +88,21 @@ runs:
       run: git config user.email "ghactions@mku.com" && git config user.name "GH Actions"
       shell: bash
 
-    # - name: Stash package-lock.json
-    #   if: ${{ steps.package-lock-status.outputs.package-changed == '1'}}
-    #   run: git stash -u
-    #   shell: bash
+    - name: Stash package-lock.json
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1'}}
+      run: git stash -a
+      shell: bash
 
-    # - name: Checkout branch
-    #   if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
-    #   uses: actions/checkout@v3
-    #   with:
-    #     ref: ${{ github.event.pull_request.head.sha }}
+    - name: Checkout branch
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
 
-    # - name: Pop package-lock.json
-    #   if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
-    #   run: git stash pop
-    #   shell: bash
+    - name: Pop package-lock.json
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
+      run: git stash pop
+      shell: bash
 
     - name: Add package-lock.json
       if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
