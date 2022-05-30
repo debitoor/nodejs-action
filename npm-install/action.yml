@@ -85,45 +85,46 @@ runs:
       run: echo "::set-output name=package-changed::$(git status | grep package-lock.json | wc -l)" 
       shell: bash
 
-    # - name: Configure git username
-    #   if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
-    #   run: git config user.email "ghactions@debitoor.com" && git config user.name "GH Actions"
-    #   shell: bash
+    - name: Configure git username
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != ''  }}
+      run: git config user.email "ghactions@debitoor.com" && git config user.name "GH Actions"
+      shell: bash
 
-    # - name: Stash package-lock.json
-    #   if: ${{ steps.package-lock-status.outputs.package-changed == '1'}}
-    #   run: git stash -a
-    #   shell: bash
+    - name: Stash package-lock.json
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != '' }}
+      run: git stash -a
+      shell: bash
 
-    # - name: Checkout branch
-    #   if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
-    #   uses: actions/checkout@v3
-    #   with:
-    #     ref: ${{ github.event.pull_request.head.sha }}
-
-    # - name: Pop package-lock.json
-    #   if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
-    #   run: git stash pop
-    #   shell: bash
-
-    # - name: Add package-lock.json
-    #   if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
-    #   run: git add package-lock.json
-    #   shell: bash
-
-    # - name: Git commit
-    #   if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
-    #   run: git commit -m "Updated package-lock.json"
-    #   shell: bash
-
-    # - name: Git push
-    #   if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
-    #   run: git push origin HEAD:$GITHUB_HEAD_REF
-    #   shell: bash
-
-    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
-      uses: stefanzweifel/git-auto-commit-action@v4
+    - name: Checkout branch
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != '' }}
+      uses: actions/checkout@v3
       with:
-        commit_message: Updated package-lock.json
-        file_pattern: "package-lock.json"
-        disable_globbing: true
+        ref: ${{ github.event.pull_request.head.sha }}
+        ssh-key: ${{ inputs.gh-ssh-private-key }}
+
+    - name: Pop package-lock.json
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != ''  }}
+      run: git stash pop
+      shell: bash
+
+    - name: Add package-lock.json
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != ''  }}
+      run: git add package-lock.json
+      shell: bash
+
+    - name: Git commit
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != ''  }}
+      run: git commit -m "Updated package-lock.json"
+      shell: bash
+
+    - name: Git push
+      if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != ''  }}
+      run: git push origin HEAD:$GITHUB_HEAD_REF
+      shell: bash
+
+    # - if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
+    #   uses: stefanzweifel/git-auto-commit-action@v4
+    #   with:
+    #     commit_message: Updated package-lock.json
+    #     file_pattern: "package-lock.json"
+    #     disable_globbing: true
