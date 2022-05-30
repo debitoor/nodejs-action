@@ -19,7 +19,11 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v3
+    # - uses: actions/checkout@v3
+    - name: Checkout branch
+      uses: actions/checkout@v3
+      with:
+        ref: ${{ github.event.pull_request.head.sha }}
     - id: determine-node-npm-version
       run: |
         NODE_VERSION=$(jq -r '.engines.node' ./package.json)
