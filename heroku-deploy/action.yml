@@ -47,5 +47,5 @@ runs:
       shell: bash
 
     - name: Check for errors in push
-      run: grep -i "failed to push" temp && exit 1
+      run: if [ ! -z "$(grep "failed to push" temp)" ]; then exit 1; fi
       shell: bash

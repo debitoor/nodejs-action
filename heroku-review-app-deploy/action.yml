@@ -88,17 +88,17 @@ runs:
       if: ${{ github.event.action != 'closed' && contains(github.event.pull_request.labels.*.name, 'review-app')}}
       shell: bash
 
-    - name: Check for errors in push
-      if: ${{ github.event.action != 'closed' && contains(github.event.pull_request.labels.*.name, 'review-app')}}
-      run: grep -i "failed to push" temp && exit 1
-      shell: bash
-
     - name: Add comment to PR
       if: ${{ github.event.label.name == 'review-app' }}
       run: |
         gh pr comment ${{ github.event.number }} --body '[Heroku app](https://dashboard.heroku.com/apps/${{ steps.review-app-name.outputs.heroku-app-name }}): https://${{ steps.review-app-name.outputs.heroku-app-name }}.herokuapp.com'
       env:
         GITHUB_TOKEN: ${{ inputs.github-token }}
+      shell: bash
+
+    - name: Check for errors in push
+      if: ${{ github.event.action != 'closed' && contains(github.event.pull_request.labels.*.name, 'review-app')}}
+      run: if [ ! -z "$(grep "failed to push" temp)" ]; then exit 1; fi
       shell: bash
 
     - name: Destroy Heroku app
