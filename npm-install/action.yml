@@ -86,25 +86,16 @@ runs:
       run: echo "::set-output name=package-changed::$(git status | grep package-lock.json | wc -l)" 
       shell: bash
 
-    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' }}
+    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != '' }}
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Updated package-lock.json
         file_pattern: "package-lock.json"
         disable_globbing: true
 
-    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key == ''}}
-      uses: actions/github-script@v5
+    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key == '' }}
+      uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        github-token: ${{secrets.GITHUB_TOKEN}}
-        script: |
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: 'Updated package-lock.json, but could not run a check against new commit. Please add some commit to trigger the workflow'
-          })
-          
-    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key == ''}}
-      run: exit 1
-      shell: bsh
+        commit_message: Updated package-lock.json. Please trigger workflow again to run check.
+        file_pattern: "package-lock.json"
+        disable_globbing: true
