@@ -90,8 +90,7 @@ runs:
 
     - name: Check for errors in push
       if: ${{ github.event.action != 'closed' && contains(github.event.pull_request.labels.*.name, 'review-app')}}
-      run: |
-        [ ! -z "$(grep -i "failed to push" temp)"" ] && exit 1
+      run: grep -i "failed to push" temp && exit 1
       shell: bash
 
     - name: Add comment to PR
