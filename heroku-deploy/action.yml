@@ -31,7 +31,7 @@ runs:
       shell: bash
 
     - name: Report branch to be pushed
-      run: echo "Pushing from $GITHUB_HEAD_REF"
+      run: echo "Pushing from $GITHUB_REF_NAME"
       shell: bash
 
     # Push to Heroku git, git always write to stderr so redirect it to stdout and then to file and run in background
