@@ -45,3 +45,8 @@ runs:
         tail -f -n 1000 temp &
         grep -m 1 -E -i "(building)|(Everything up-to-date)|(failed to push)" <(tail -f -n 1000 temp) 
       shell: bash
+
+    - name: Check for errors in push
+      run: |
+        [ ! -z $(grep -i "failed to push" temp) ] && exit 1
+      shell: bash
