@@ -36,7 +36,7 @@ runs:
 
     # Push to Heroku git, git always write to stderr so redirect it to stdout and then to file and run in background
     - name: Push to Heroku Git
-      run: git push -f heroku $GITHUB_HEAD_REF:master > temp 2>&1 &
+      run: git push -f heroku $GITHUB_REF_NAME:master > temp 2>&1 &
       shell: bash
 
     # Wait for Heroku response that build process has been started (exit grep after first match)
