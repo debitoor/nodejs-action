@@ -46,6 +46,9 @@ runs:
           **/node_modules
           ~/.cache/Cypress
         key: ${{ runner.os }}-modules-${{ hashFiles('package.json') }}
+        restore-keys: |
+          ${{ runner.os }}-modules-${{ hashFiles('package.json') }}
+          ${{ runner.os }}-modules-
     - name: Update NPM
       if: steps.determine-node-npm-version.outputs.npm-version != ''
       run: npm i npm@${{ steps.determine-node-npm-version.outputs.npm-version }} -g
