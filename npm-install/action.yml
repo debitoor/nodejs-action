@@ -15,6 +15,10 @@ inputs:
     description: 'Run npm ci instead of npm i'
     required: false
     default: 'false'
+  skip-package-lock-commit:
+    description: 'Set to true to skip committing package-lock.json'
+    required: false
+    default: 'false'
 
 runs:
   using: "composite"
@@ -90,14 +94,14 @@ runs:
       run: echo "::set-output name=package-changed::$(git status | grep package-lock.json | wc -l)" 
       shell: bash
 
-    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != '' }}
+    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != '' && inputs.skip-package-lock-commit != 'true' }}
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Updated package-lock.json
         file_pattern: "package-lock.json"
         disable_globbing: true
 
-    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key == '' }}
+    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key == '' && inputs.skip-package-lock-commit != 'true' }}
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Updated package-lock.json. Please trigger workflow again to run check.
