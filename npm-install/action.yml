@@ -94,14 +94,14 @@ runs:
       run: echo "::set-output name=package-changed::$(git status | grep package-lock.json | wc -l)" 
       shell: bash
 
-    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != '' && github.ref_protected != 'true' }}
+    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != '' && github.ref_protected != true }}
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Updated package-lock.json
         file_pattern: "package-lock.json"
         disable_globbing: true
 
-    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key == '' && github.ref_protected != 'true' }}
+    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key == '' && github.ref_protected != true }}
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Updated package-lock.json. Please trigger workflow again to run check.
