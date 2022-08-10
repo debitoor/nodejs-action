@@ -20,7 +20,7 @@ inputs:
     required: false
     default: 'false'
   npm-command-flags:
-    description: ""
+    description: run npm command with additional flags
     required: false
     default: ""
 
