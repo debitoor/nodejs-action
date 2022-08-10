@@ -22,6 +22,7 @@ inputs:
   npm-command-flags:
     description: run npm command with additional flags
     required: false
+    example: --legacy-peer-deps --omit=dev
     default: ""
 
 runs:
