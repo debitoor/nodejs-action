@@ -19,6 +19,11 @@ inputs:
     description: 'Set to true to skip committing package-lock.json'
     required: false
     default: 'false'
+  npm-command-flags:
+    description: run npm command with additional flags
+    required: false
+    example: --legacy-peer-deps --omit=dev
+    default: ""
 
 runs:
   using: "composite"
@@ -73,11 +78,11 @@ runs:
         known_hosts: ${{ inputs.gh-ssh-known-hosts }}
     - name: NPM Install
       if: inputs.npm-ci-install == 'false' && steps.cache-node-modules.outputs.cache-hit != 'true'
-      run: npm install
+      run: npm install ${{ inputs.npm-command-flags }}
       shell: bash
     - name: NPM CI
       if: inputs.npm-ci-install == 'true' && steps.cache-node-modules.outputs.cache-hit != 'true'
-      run: npm ci
+      run: npm ci ${{ inputs.npm-command-flags }}
       shell: bash
     - name: Print debug logs
       if: ${{ failure() }}
