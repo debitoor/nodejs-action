@@ -1,0 +1,26 @@
+name: Tag release
+
+on:
+  push:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+    inputs:
+      tag-name:
+        description: 'Tag name'     
+        required: true
+        default: 'test'
+        
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Tag source
+        env:
+          TAG_NAME: ${{ inputs.tag-name || 'v1' }}
+        run: git tag -f -am "$TAG_NAME" $TAG_NAME
+
+      - name: Push tag
+        run: git push --tags -f
