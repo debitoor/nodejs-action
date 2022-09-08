@@ -17,6 +17,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Configure Git
+        run: |
+          git config --global user.email "ops@debitoor.com"
+          git config --global user.name "Debitoor OPS"
+        
       - name: Tag source
         env:
           TAG_NAME: ${{ inputs.tag-name || 'v1' }}
