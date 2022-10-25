@@ -30,7 +30,7 @@ runs:
     - name: Generate review app name
       env:
         HEROKU_APP_NAME: ${{ inputs.heroku-app-name }}
-      run: echo "::set-output name=heroku-app-name::review-${HEROKU_APP_NAME:0:15}-${{ github.event.number }}"
+      run: echo "heroku-app-name=review-${HEROKU_APP_NAME:0:15}-${{ github.event.number }}" >> $GITHUB_OUTPUT
       id: review-app-name
       shell: bash
 
