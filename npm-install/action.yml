@@ -46,7 +46,7 @@ runs:
       with:
         node-version: ${{ steps.determine-node-npm-version.outputs.node-version }}
         # cache: 'npm' # This throws errors when package-lock.json is not in repo - use manual setup below until package-lock.json will be used everywhere
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       id: cache-node-modules
       with:
         path: |
