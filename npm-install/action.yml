@@ -35,18 +35,18 @@ runs:
     - id: determine-node-npm-version
       run: |
         NODE_VERSION=$(jq -r '.engines.node' ./package.json)
-        echo "::set-output name=node-version::${NODE_VERSION/null/14}"
+        echo "node-version=${NODE_VERSION/null/14}" >> $GITHUB_OUTPUT
         NPM_VERSION=$(jq -r '.engines.npm' ./package.json)
-        echo "::set-output name=npm-version::${NPM_VERSION/null/}"
+        echo "npm-version=${NPM_VERSION/null/}" >> $GITHUB_OUTPUT
         NPM_POSTINSTALL=$(jq -r '.scripts.postinstall' ./package.json)
-        echo "::set-output name=npm-postinstall::${NPM_POSTINSTALL/null/}"
+        echo "npm-postinstall=${NPM_POSTINSTALL/null/}" >> $GITHUB_OUTPUT
       shell: bash
     - name: Use Node.js
       uses: actions/setup-node@v3
       with:
         node-version: ${{ steps.determine-node-npm-version.outputs.node-version }}
         # cache: 'npm' # This throws errors when package-lock.json is not in repo - use manual setup below until package-lock.json will be used everywhere
-    - uses: actions/cache@v2
+    - uses: actions/cache@v3
       id: cache-node-modules
       with:
         path: |
@@ -96,7 +96,7 @@ runs:
     # Update package-lock.json as artifact if someone forgot to push it
     - name: Check if package-lock.json has updates
       id: package-lock-status
-      run: echo "::set-output name=package-changed::$(git status | grep package-lock.json | wc -l)" 
+      run: echo "package-changed=$(git status | grep package-lock.json | wc -l)" >> $GITHUB_OUTPUT
       shell: bash
 
     - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != '' && github.ref_protected != true }}
@@ -109,10 +109,10 @@ runs:
     - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key == '' && github.ref_protected != true && github.actor != 'dependabot[bot]' }}
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        commit_message: Updated package-lock.json. Please trigger workflow again to run check.
+        commit_message: "[skip ci] Updated package-lock.json. Please trigger workflow again to run check."
         file_pattern: "package-lock.json"
         disable_globbing: true
 
     - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && github.ref_protected == true }}
-      run: echo "package-lock.json has been updated in this run, but changes cannot be pushed to protected branch"
+      run: echo "[skip ci] package-lock.json has been updated in this run, but changes cannot be pushed to protected branch"
       shell: bash
