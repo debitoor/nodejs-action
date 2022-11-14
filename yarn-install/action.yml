@@ -1,0 +1,82 @@
+name: 'Run YARN install'
+description: 'Workflow to execute yarn install script'
+
+inputs:
+  npmrc:
+    description: 'NPMRC'
+    required: true
+  gh-ssh-private-key:
+    description: 'SSH private key'
+    required: false
+  gh-ssh-known-hosts:
+    description: 'SSH known hosts'
+    required: false
+  yarn-version:
+    description: 'YARN version'
+    required: true
+  yarn-command-flags:
+    description: run yarn command with additional flags
+    required: false
+    example: --immutable
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v3
+      with:
+        ref: ${{ github.head_ref }}
+        ssh-key: ${{ inputs.gh-ssh-private-key }}
+    - id: determine-node-npm-version
+      run: |
+        NODE_VERSION=$(jq -r '.engines.node' ./package.json)
+        echo "node-version=${NODE_VERSION/null/14}" >> $GITHUB_OUTPUT
+        NPM_VERSION=$(jq -r '.engines.npm' ./package.json)
+        echo "npm-version=${NPM_VERSION/null/}" >> $GITHUB_OUTPUT
+      shell: bash
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ steps.determine-node-npm-version.outputs.node-version }}
+        # cache: 'npm' # This throws errors when package-lock.json is not in repo - use manual setup below until package-lock.json will be used everywhere
+    - uses: actions/cache@v3
+      id: cache-node-modules
+      with:
+        path: |
+          ~/.npm
+          node_modules
+          !node_modules/**/node_modules
+          **/node_modules
+          ~/.cache/Cypress
+        key: ${{ runner.os }}-modules-${{ hashFiles('package.json') }}
+        restore-keys: |
+          ${{ runner.os }}-modules-${{ hashFiles('package.json') }}
+          ${{ runner.os }}-modules-
+    - name: Update NPM
+      if: steps.determine-node-npm-version.outputs.npm-version != ''
+      run: npm i npm@${{ steps.determine-node-npm-version.outputs.npm-version }} -g
+      shell: bash
+    - name: Install YARN
+      run: npm i yarn@${{ inputs.yarn-version }} -g
+      shell: bash
+
+    # Configure credentials
+    - name: Create NPMRC
+      env:
+        NPMRC: ${{ inputs.npmrc }}
+      run: echo "$NPMRC" > .npmrc
+      shell: bash
+    - name: Install SSH Key
+      if: inputs.gh-ssh-private-key != ''
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ inputs.gh-ssh-private-key }} 
+        known_hosts: ${{ inputs.gh-ssh-known-hosts }}
+    - name: YARN Install
+      if: steps.cache-node-modules.outputs.cache-hit != 'true'
+      run: yarn install ${{ inputs.yarn-command-flags }}
+      shell: bash
+    - name: Print debug logs
+      if: ${{ failure() }}
+      run: cat ~/.npm/_logs/*
+      shell: bash
