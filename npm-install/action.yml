@@ -113,8 +113,8 @@ runs:
         issue-number: ${{ github.event.number }}
         body: |
           `package-lock.json` seems to be not in sync with `package.json`. 
-          Please commit updated `package-lock.json` file (otherwise Heroku deployment might fail).
+          Please commit updated `package-lock.json` file (otherwise deployment might fail).
 
     - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && github.ref_protected == true }}
-      run: echo "[skip ci] package-lock.json has been updated in this run, but changes cannot be pushed to protected branch"
+      run: echo "package-lock.json has been updated in this run, but changes cannot be pushed to protected branch"
       shell: bash
