@@ -106,13 +106,15 @@ runs:
         file_pattern: "package-lock.json"
         disable_globbing: true
 
-    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key == '' && github.ref_protected != true && github.actor != 'dependabot[bot]' }}
-      uses: stefanzweifel/git-auto-commit-action@v4
+    - if: ${{ github.event.number != '' && steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key == '' && github.ref_protected != true && github.actor != 'dependabot[bot]' }}
+      name: Comment outdated package-lock.json
+      uses: peter-evans/create-or-update-comment@v2
       with:
-        commit_message: "[skip ci] Updated package-lock.json. Please trigger workflow again to run check."
-        file_pattern: "package-lock.json"
-        disable_globbing: true
+        issue-number: ${{ github.event.number }}
+        body: |
+          `package-lock.json` seems to be not in sync with `package.json`. 
+          Please commit updated `package-lock.json` file (otherwise deployment might fail).
 
     - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && github.ref_protected == true }}
-      run: echo "[skip ci] package-lock.json has been updated in this run, but changes cannot be pushed to protected branch"
+      run: echo "package-lock.json has been updated in this run, but changes cannot be pushed to protected branch"
       shell: bash
