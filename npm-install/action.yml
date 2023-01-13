@@ -34,9 +34,9 @@ runs:
         ssh-key: ${{ inputs.gh-ssh-private-key }}
     - id: determine-node-npm-version
       run: |
-        NODE_VERSION=$(jq -r '.engines.node' ./package.json)
+        NODE_VERSION=$(jq -r '.engines.node' ./package.json | tr -d '<=>')
         echo "node-version=${NODE_VERSION/null/14}" >> $GITHUB_OUTPUT
-        NPM_VERSION=$(jq -r '.engines.npm' ./package.json)
+        NPM_VERSION=$(jq -r '.engines.npm' ./package.json | tr -d '<=>')
         echo "npm-version=${NPM_VERSION/null/}" >> $GITHUB_OUTPUT
         NPM_POSTINSTALL=$(jq -r '.scripts.postinstall' ./package.json)
         echo "npm-postinstall=${NPM_POSTINSTALL/null/}" >> $GITHUB_OUTPUT
