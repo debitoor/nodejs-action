@@ -28,6 +28,12 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Validate npmrc
+      if: inputs.npmrc == ''
+      run: |
+        echo "::error::npmrc is empty. Please set it in Actions and/or Dependabot secrets"
+        exit 1
+      shell: bash
     - uses: actions/checkout@v3
       with:
         ref: ${{ github.head_ref }}
