@@ -37,7 +37,7 @@ runs:
       uses: docker/build-push-action@v2
       with:
         push: true
-        file: ${{ dockerfilePath }}
+        file: ${{ inputs.dockerfilePath }}
         build-args: |
           NPMRC=${{ inputs.npmrc }}
           ssh_prv_key=${{ inputs.gh-ssh-private-key-b64 }}
