@@ -17,6 +17,9 @@ inputs:
   gh-ssh-private-key-b64:
     description: 'Base64 encoded GH private key'
     required: true
+  dockerfilePath:
+    description: Path to Dockerfile if different than root
+    required: false
 
 runs:
   using: "composite"
@@ -34,6 +37,7 @@ runs:
       uses: docker/build-push-action@v2
       with:
         push: true
+        file: ${{ inputs.dockerfilePath }}
         build-args: |
           NPMRC=${{ inputs.npmrc }}
           ssh_prv_key=${{ inputs.gh-ssh-private-key-b64 }}
