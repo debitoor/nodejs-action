@@ -19,7 +19,7 @@ inputs:
     required: true
   dockerfilePath:
     description: Path to Dockerfile if different than root
-    default: './Dockerfile'
+    required: false
 
 runs:
   using: "composite"
