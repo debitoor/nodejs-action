@@ -1,0 +1,48 @@
+name: 'Update deployment status'
+description: 'Workflow to manage Github deployment statuses'
+
+inputs:
+  state:
+    description: 'Deployment state'
+    default: 'pending'
+    required: false
+  environment:
+    description: 'Environment that is deployed'
+    default: 'production'
+    required: false
+  deployment-id:
+    description: 'Deployment ID'
+    required: false
+outputs:
+  deployment-id:
+    description: "Deployment ID"
+    value: ${{ steps.create-deployment.outputs.deployment-id }}
+
+runs:
+  using: "composite"
+  steps:
+    - id: create-deployment
+      if: inputs.state == 'pending'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        PAYLOAD="{\"ref\": \"${{ github.ref }}\",\"environment\": \"${{ inputs.environment }}\", \"required_contexts\": []}"
+        
+        echo deployment-id=$(echo "$PAYLOAD" | gh api \
+          --method POST \
+          -H "Accept: application/vnd.github+json" \
+          /repos/${{ github.repository }}/deployments \
+          --jq ".id" \
+          --input -) >> $GITHUB_OUTPUT
+      shell: bash
+    
+    - if: inputs.state != 'pending'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        gh api \
+        --method POST \
+        -H "Accept: application/vnd.github+json" \
+        /repos/${{ github.repository }}/deployments/${{ inputs.deployment-id }}/statuses \
+        -f state=${{ inputs.state }} \
+      shell: bash
