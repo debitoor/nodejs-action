@@ -34,13 +34,15 @@ runs:
     - name: Build and push
       env:
         ECR_REPOSITORY: ${{ github.event.repository.name }} # NOTE: this is not populated for scheduled jobs
+        NPMRC: ${{ inputs.npmrc }}
+        ssh_prv_key: ${{ inputs.gh-ssh-private-key-b64 }}
       uses: docker/build-push-action@v2
       with:
         push: true
         file: ${{ inputs.dockerfilePath }}
         build-args: |
-          NPMRC=${{ inputs.npmrc }}
-          ssh_prv_key=${{ inputs.gh-ssh-private-key-b64 }}
+          NPMRC
+          ssh_prv_key
         tags: ${{ inputs.aws-ecr-registry }}/${{ env.ECR_REPOSITORY }}:latest
     - name: List Docker images
       run: docker images
