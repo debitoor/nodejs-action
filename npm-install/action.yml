@@ -62,7 +62,7 @@ runs:
           !node_modules/**/node_modules
           **/node_modules
           ~/.cache/Cypress
-          ~/.cache/puppeteer
+          .cache/puppeteer
         key: ${{ runner.os }}-modules-${{ hashFiles('package.json') }}
         restore-keys: |
           ${{ runner.os }}-modules-${{ hashFiles('package.json') }}
