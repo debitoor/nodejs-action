@@ -6,43 +6,57 @@ inputs:
     description: 'Deployment state'
     default: 'pending'
     required: false
-  environment:
-    description: 'Environment that is deployed'
+  environments:
     default: 'production'
+    description: ''
     required: false
-  deployment-id:
-    description: 'Deployment ID'
-    required: false
-outputs:
-  deployment-id:
-    description: "Deployment ID"
-    value: ${{ steps.create-deployment.outputs.deployment-id }}
 
 runs:
   using: "composite"
   steps:
-    - id: create-deployment
-      if: inputs.state == 'pending'
+    - name: Update deployment
+      run: |
+        for env_name in $(echo "${envs}" | tr ',' '\n')
+        do
+          echo "${env_name}"
+          deployment_id_var=${env_name//-/_}_deployment_id
+          if [[ ${!deployment_id_var} != "" ]]
+          then
+            echo "Updating Deployment ${env_name} --> ${{ inputs.state }}"
+            
+            gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/deployments/${!deployment_id_var}/statuses \
+            -f state=${{ inputs.state }}
+          fi
+        done
       env:
         GH_TOKEN: ${{ github.token }}
-      run: |
-        PAYLOAD="{\"ref\": \"${{ github.ref }}\",\"environment\": \"${{ inputs.environment }}\", \"required_contexts\": []}"
-        
-        echo deployment-id=$(echo "$PAYLOAD" | gh api \
-          --method POST \
-          -H "Accept: application/vnd.github+json" \
-          /repos/${{ github.repository }}/deployments \
-          --jq ".id" \
-          --input -) >> $GITHUB_OUTPUT
+        envs: ${{ inputs.environments }}
       shell: bash
-    
-    - if: inputs.state != 'pending'
+
+    - name: Create deployment
+      run: |
+        for env_name in $(echo "${envs}" | tr ',' '\n')
+        do
+          echo "${env_name}"
+          deployment_id_var=${env_name//-/_}_deployment_id
+          if [[ ${!deployment_id_var} == "" ]]
+          then
+            echo "Creating Deployment ${env_name} --> ${{ inputs.state }}"
+            PAYLOAD="{\"ref\": \"${{ github.ref }}\",\"environment\": \"${env_name}\", \"required_contexts\": []}"
+            
+            echo ${deployment_id_var}=$(echo "$PAYLOAD" | gh api \
+              --method POST \
+              -H "Accept: application/vnd.github+json" \
+              /repos/${{ github.repository }}/deployments \
+              --jq ".id" \
+              --input -) >> $GITHUB_ENV
+          fi
+        done
       env:
         GH_TOKEN: ${{ github.token }}
-      run: |
-        gh api \
-        --method POST \
-        -H "Accept: application/vnd.github+json" \
-        /repos/${{ github.repository }}/deployments/${{ inputs.deployment-id }}/statuses \
-        -f state=${{ inputs.state }} \
+        envs: ${{ inputs.environments }}
       shell: bash
+   
