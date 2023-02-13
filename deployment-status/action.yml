@@ -3,12 +3,12 @@ description: 'Workflow to manage Github deployment statuses'
 
 inputs:
   state:
-    description: 'Deployment state'
+    description: 'Deployment state. One of: error, failure, inactive, in_progress, queued, pending, success'
     default: 'pending'
     required: false
   environments:
     default: 'production'
-    description: ''
+    description: 'Comma separated environments used for deployment'
     required: false
 
 runs:
