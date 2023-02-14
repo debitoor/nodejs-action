@@ -7,7 +7,7 @@ inputs:
     default: 'pending'
     required: false
   environments:
-    default: 'production'
+    default: 'fleet-live'
     description: 'Comma separated environments used for deployment'
     required: false
 
