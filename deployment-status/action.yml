@@ -1,0 +1,56 @@
+name: 'Update deployment status'
+description: 'Workflow to manage Github deployment statuses'
+
+inputs:
+  state:
+    description: 'Deployment state. One of: error, failure, inactive, in_progress, queued, pending, success'
+    default: 'pending'
+    required: false
+  environments:
+    default: 'fleet-live'
+    description: 'Comma separated environments used for deployment'
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - name: Create/Update deployment
+      run: |
+        for env_name in $(echo "${envs}" | tr ',' '\n')
+        do
+          echo "${env_name}"
+          echo "Checking for existing deployment for sha ${{ github.sha }}"
+
+          deployment_id=$(gh api \
+            --method GET \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/deployments \
+            -f environment="${env_name}" \
+            -f sha="${{ github.sha }}" \
+            --jq '.[-1].id')
+
+          if [[ ${deployment_id} != "" ]]
+          then
+            echo "Updating Deployment ${env_name} --> ${{ inputs.state }}"
+
+            gh api \
+            --method POST \
+            -H "Accept: application/vnd.github+json" \
+            /repos/${{ github.repository }}/deployments/${deployment_id}/statuses \
+            -f state=${{ inputs.state }}
+          else
+            echo "Creating Deployment ${env_name} --> ${{ inputs.state }}"
+
+            # workaround for GH CLI not handling empty arrays as parameters
+            PAYLOAD="{\"ref\": \"${{ github.ref }}\",\"environment\": \"${env_name}\", \"required_contexts\": []}"
+            echo "$PAYLOAD" | gh api \
+              --method POST \
+              -H "Accept: application/vnd.github+json" \
+              /repos/${{ github.repository }}/deployments \
+              --input -
+          fi
+        done
+      env:
+        GH_TOKEN: ${{ github.token }}
+        envs: ${{ inputs.environments }}
+      shell: bash
