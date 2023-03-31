@@ -2,9 +2,12 @@ name: 'Run NPM install'
 description: 'Workflow to execute npm install script'
 
 inputs:
-  npmrc:
-    description: 'NPMRC'
+  debitoor-npm-token:
+    description: 'NPM token for Debitoor packages'
     required: true
+  sumup-npm-token:
+    description: 'NPM token for SumUp packages'
+    required: false
   gh-ssh-private-key:
     description: 'SSH private key'
     required: false
@@ -22,16 +25,15 @@ inputs:
   npm-command-flags:
     description: run npm command with additional flags
     required: false
-    example: --legacy-peer-deps --omit=dev
     default: ""
 
 runs:
   using: "composite"
   steps:
-    - name: Validate npmrc
-      if: inputs.npmrc == ''
+    - name: Validate debitoor NPM token
+      if: inputs.debitoor-npm-token == ''
       run: |
-        echo "::error::npmrc is empty. Please set it in Actions and/or Dependabot secrets"
+        echo "::error::debitoor-npm-token is empty. Please set it in Actions and/or Dependabot secrets"
         exit 1
       shell: bash
     - uses: actions/checkout@v3
@@ -73,10 +75,18 @@ runs:
       shell: bash
 
     # Configure credentials
-    - name: Create NPMRC
+    - name: Configure debitoor token
       env:
-        NPMRC: ${{ inputs.npmrc }}
-      run: echo "$NPMRC" > .npmrc
+        debitoor_npm_token: ${{ inputs.debitoor-npm-token }}
+      run: echo "//registry.npmjs.org/:_authToken=${debitoor_npm_token}" > .npmrc
+      shell: bash
+    - name: Configure debitoor token
+      if: inputs.sumup-npm-token != ''
+      env:
+        sumup_npm_token: ${{ inputs.sumup-npm-token }}
+      run: |
+        echo "@sumup:registry=https://npm.pkg.github.com" >> .npmrc
+        echo "//npm.pkg.github.com/:_authToken=${sumup_npm_token}" >> .npmrc
       shell: bash
     - name: Install SSH Key
       if: inputs.gh-ssh-private-key != ''
