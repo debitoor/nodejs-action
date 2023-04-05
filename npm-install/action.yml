@@ -75,12 +75,12 @@ runs:
       shell: bash
 
     # Configure credentials
-    - name: Configure debitoor token
+    - name: Configure Debitoor token
       env:
         debitoor_npm_token: ${{ inputs.debitoor-npm-token }}
       run: echo "//registry.npmjs.org/:_authToken=${debitoor_npm_token}" > .npmrc
       shell: bash
-    - name: Configure debitoor token
+    - name: Configure SumUp token
       if: inputs.sumup-npm-token != ''
       env:
         sumup_npm_token: ${{ inputs.sumup-npm-token }}
