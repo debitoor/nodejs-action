@@ -24,7 +24,7 @@ jobs:
         
       - name: Tag source
         env:
-          TAG_NAME: ${{ inputs.tag-name || 'v1' }}
+          TAG_NAME: ${{ inputs.tag-name || 'v2' }}
         run: git tag -f -am "$TAG_NAME" $TAG_NAME
 
       - name: Push tag
