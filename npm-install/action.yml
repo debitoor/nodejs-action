@@ -3,10 +3,10 @@ description: 'Workflow to execute npm install script'
 
 inputs:
   debitoor-npm-token:
-    description: 'NPM token for Debitoor packages'
+    description: 'NPM token for @debitoor scoped packages'
     required: true
   sumup-npm-token:
-    description: 'NPM token for SumUp packages'
+    description: 'NPM token for @sumup scoped packages'
     required: false
   gh-ssh-private-key:
     description: 'SSH private key'
