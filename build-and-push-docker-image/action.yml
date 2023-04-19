@@ -11,9 +11,12 @@ inputs:
   aws-ecr-registry:
     description: 'AWS ECR registry'
     required: true
-  npmrc:
-    description: 'npmrc. Text or base64 encoded'
+  debitoor-npm-token:
+    description: 'NPM token for @debitoor scoped packages'
     required: true
+  sumup-npm-token:
+    description: 'NPM token for @sumup scoped packages'
+    required: false
   gh-ssh-private-key-b64:
     description: 'Base64 encoded GH private key'
     required: true
@@ -24,7 +27,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Login to AWS ECR Registry
       uses: docker/login-action@v1 
       with:
@@ -34,14 +37,16 @@ runs:
     - name: Build and push
       env:
         ECR_REPOSITORY: ${{ github.event.repository.name }} # NOTE: this is not populated for scheduled jobs
-        NPMRC: ${{ inputs.npmrc }}
+        DEBITOOR_NPM_TOKEN: ${{ inputs.debitoor-npm-token }}
+        SUMUP_NPM_TOKEN: ${{ inputs.sumup-npm-token }}
         ssh_prv_key: ${{ inputs.gh-ssh-private-key-b64 }}
       uses: docker/build-push-action@v2
       with:
         push: true
         file: ${{ inputs.dockerfilePath }}
         build-args: |
-          NPMRC
+          DEBITOOR_NPM_TOKEN
+          SUMUP_NPM_TOKEN
           ssh_prv_key
         tags: ${{ inputs.aws-ecr-registry }}/${{ env.ECR_REPOSITORY }}:latest
     - name: List Docker images
