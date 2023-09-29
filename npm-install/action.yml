@@ -129,7 +129,7 @@ runs:
         file_pattern: "package-lock.json"
         disable_globbing: true
 
-    - if: ${{ github.event.number != '' && (steps.package-lock-status.outputs.package-changed == '1' || steps.outdated-lockfile.outputs.outdated-lockfile != '0') && inputs.gh-ssh-private-key == '' && github.ref_protected != true && github.actor != 'dependabot[bot]' && !contains(github.event.pull_request.title, '-texts') }}
+    - if: ${{ always() && github.event.number != '' && (steps.package-lock-status.outputs.package-changed == '1' || steps.outdated-lockfile.outputs.outdated-lockfile != '0') && inputs.gh-ssh-private-key == '' && github.ref_protected != true && github.actor != 'dependabot[bot]' && !contains(github.event.pull_request.title, '-texts') }}
       name: Comment outdated package-lock.json
       uses: peter-evans/create-or-update-comment@v2
       with:
