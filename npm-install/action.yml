@@ -106,6 +106,11 @@ runs:
       if: ${{ failure() }}
       run: cat ~/.npm/_logs/*
       shell: bash
+    - name: Check outdated lockfile
+      id: outdated-lockfile
+      if: ${{ failure() }}
+      run: echo "outdated-lockfile=$(grep 'Please update your lock file with' ~/.npm/_logs/*debug*.log | wc -l)" >> $GITHUB_OUTPUT
+      shell: bash
     - name: NPM postinstall script
       if: steps.determine-node-npm-version.outputs.npm-postinstall != '' && steps.cache-node-modules.outputs.cache-hit == 'true'
       run: npm run postinstall
@@ -124,7 +129,7 @@ runs:
         file_pattern: "package-lock.json"
         disable_globbing: true
 
-    - if: ${{ github.event.number != '' && steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key == '' && github.ref_protected != true && github.actor != 'dependabot[bot]' && !contains(github.event.pull_request.title, '-texts') }}
+    - if: ${{ github.event.number != '' && (steps.package-lock-status.outputs.package-changed == '1' || steps.outdated-lockfile.outputs.outdated-lockfile != '0') && inputs.gh-ssh-private-key == '' && github.ref_protected != true && github.actor != 'dependabot[bot]' && !contains(github.event.pull_request.title, '-texts') }}
       name: Comment outdated package-lock.json
       uses: peter-evans/create-or-update-comment@v2
       with:
