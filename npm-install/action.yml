@@ -17,7 +17,7 @@ inputs:
   npm-ci-install:
     description: 'Run npm ci instead of npm i'
     required: false
-    default: 'false'
+    default: 'true'
   skip-package-lock-commit:
     description: 'Set to true to skip committing package-lock.json'
     required: false
@@ -95,11 +95,11 @@ runs:
         key: ${{ inputs.gh-ssh-private-key }} 
         known_hosts: ${{ inputs.gh-ssh-known-hosts }}
     - name: NPM Install
-      if: inputs.npm-ci-install == 'false' && steps.cache-node-modules.outputs.cache-hit != 'true'
+      if: (github.actor == 'bobhammer' || inputs.npm-ci-install == 'false') && steps.cache-node-modules.outputs.cache-hit != 'true'
       run: npm install ${{ inputs.npm-command-flags }}
       shell: bash
     - name: NPM CI
-      if: inputs.npm-ci-install == 'true' && steps.cache-node-modules.outputs.cache-hit != 'true'
+      if: github.actor != 'bobhammer' && inputs.npm-ci-install == 'true' && steps.cache-node-modules.outputs.cache-hit != 'true'
       run: npm ci ${{ inputs.npm-command-flags }}
       shell: bash
     - name: Print debug logs
