@@ -135,6 +135,16 @@ runs:
         file_pattern: "package-lock.json"
         disable_globbing: true
 
+    # Comment regarding updated lockfile when SSH key is not provided
+    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key == '' && github.ref_protected != true && github.actor == 'bobhammer' }}
+      name: Comment updated package-lock.json
+      uses: peter-evans/create-or-update-comment@v2
+      with:
+        issue-number: ${{ github.event.number }}
+        body: |
+          `package-lock.json` has been updated in recent CI workflow run, but cannot be commited because of missing SSH key.
+          Please run `npm install` and commit updated `package-lock.json` file or provide SSH key in `gh-ssh-private-key`.
+
     # Comment regarding outdated lockfile
     - if: ${{ always() && github.event.number != '' && steps.outdated-lockfile.outputs.outdated-lockfile != '0' && github.actor != 'bobhammer' }}
       name: Comment outdated package-lock.json
