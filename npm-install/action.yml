@@ -94,10 +94,13 @@ runs:
       with:
         key: ${{ inputs.gh-ssh-private-key }} 
         known_hosts: ${{ inputs.gh-ssh-known-hosts }}
+
+    # Updates by Bob should always run `npm install`
     - name: NPM Install
       if: (github.actor == 'bobhammer' || inputs.npm-ci-install == 'false') && steps.cache-node-modules.outputs.cache-hit != 'true'
       run: npm install ${{ inputs.npm-command-flags }}
       shell: bash
+    # Updates from other users should run `npm ci` unless `npm-ci-install` has been set to false
     - name: NPM CI
       if: github.actor != 'bobhammer' && inputs.npm-ci-install == 'true' && steps.cache-node-modules.outputs.cache-hit != 'true'
       run: npm ci ${{ inputs.npm-command-flags }}
@@ -106,38 +109,38 @@ runs:
       if: ${{ failure() }}
       run: cat ~/.npm/_logs/*
       shell: bash
+
     - name: Check outdated lockfile
       id: outdated-lockfile
       if: ${{ failure() }}
       run: echo "outdated-lockfile=$(grep 'Please update your lock file with' ~/.npm/_logs/*debug*.log | wc -l)" >> $GITHUB_OUTPUT
       shell: bash
+
     - name: NPM postinstall script
-      if: steps.determine-node-npm-version.outputs.npm-postinstall != '' && steps.cache-node-modules.outputs.cache-hit == 'true'
+      if: inputs.npm-ci-install == 'false' && steps.determine-node-npm-version.outputs.npm-postinstall != '' && steps.cache-node-modules.outputs.cache-hit == 'true'
       run: npm run postinstall
       shell: bash
 
-    # Update package-lock.json as artifact if someone forgot to push it
+    # Update package-lock.json after `npm install`
     - name: Check if package-lock.json has updates
       id: package-lock-status
       run: echo "package-changed=$(git status | grep package-lock.json | wc -l)" >> $GITHUB_OUTPUT
       shell: bash
 
-    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != '' && github.ref_protected != true && github.actor != 'dependabot[bot]' && contains(github.event.pull_request.title, '-texts') }}
+    # Commit package-lock.json if it has been updated (only for Bob's PRs) AND SSH key was provided (so PR checks can be triggered again)
+    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != '' && github.ref_protected != true && github.actor == 'bobhammer' }}
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
         commit_message: Updated package-lock.json
         file_pattern: "package-lock.json"
         disable_globbing: true
 
-    - if: ${{ always() && github.event.number != '' && (steps.package-lock-status.outputs.package-changed == '1' || steps.outdated-lockfile.outputs.outdated-lockfile != '0') && inputs.gh-ssh-private-key == '' && github.ref_protected != true && github.actor != 'dependabot[bot]' && !contains(github.event.pull_request.title, '-texts') }}
+    # Comment regarding outdated lockfile
+    - if: ${{ always() && github.event.number != '' && steps.outdated-lockfile.outputs.outdated-lockfile != '0' && github.actor != 'bobhammer' }}
       name: Comment outdated package-lock.json
       uses: peter-evans/create-or-update-comment@v2
       with:
         issue-number: ${{ github.event.number }}
         body: |
-          `package-lock.json` seems to be not in sync with `package.json`. 
-          Please commit updated `package-lock.json` file (otherwise deployment might fail).
-
-    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && github.ref_protected == true }}
-      run: echo "package-lock.json has been updated in this run, but changes cannot be pushed to protected branch"
-      shell: bash
+          `package-lock.json` is not in sync with `package.json`. 
+          Please commit updated `package-lock.json` file (otherwise deployment will fail).
