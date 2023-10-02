@@ -110,6 +110,8 @@ runs:
       run: cat ~/.npm/_logs/*
       shell: bash
 
+    # `npm ci` fails if package-lock.json file had been not committed after updating package.json
+    # This step looks for such error in logs from `npm ci` so later we can add a comment regarding this to PR
     - name: Check outdated lockfile
       id: outdated-lockfile
       if: ${{ failure() }}
