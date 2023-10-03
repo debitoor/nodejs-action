@@ -44,7 +44,7 @@ runs:
       run: |
         # tr-d '<=>' to trim '>=8.19.x' to '8.19.x' to prevent major version bumps (like npm@9.3.0 installed by npm i npm@>=8.19.x)
         NODE_VERSION=$(jq -r '.engines.node' ./package.json | tr -d '<=>')
-        echo "node-version=${NODE_VERSION/null/14}" >> $GITHUB_OUTPUT
+        echo "node-version=${NODE_VERSION/null/16}" >> $GITHUB_OUTPUT
         NPM_VERSION=$(jq -r '.engines.npm' ./package.json | tr -d '<=>')
         echo "npm-version=${NPM_VERSION/null/}" >> $GITHUB_OUTPUT
         NPM_POSTINSTALL=$(jq -r '.scripts.postinstall' ./package.json)
