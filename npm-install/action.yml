@@ -119,7 +119,7 @@ runs:
       shell: bash
 
     - name: NPM postinstall script
-      if: inputs.npm-ci-install == 'false' && steps.determine-node-npm-version.outputs.npm-postinstall != '' && steps.cache-node-modules.outputs.cache-hit == 'true'
+      if: steps.determine-node-npm-version.outputs.npm-postinstall != '' && steps.cache-node-modules.outputs.cache-hit == 'true'
       run: npm run postinstall
       shell: bash
 
