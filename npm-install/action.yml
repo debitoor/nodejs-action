@@ -65,9 +65,9 @@ runs:
           **/node_modules
           ~/.cache/Cypress
           .cache/puppeteer
-        key: ${{ runner.os }}-modules-${{ hashFiles('package.json') }}
+        key: ${{ runner.os }}-modules-${{ hashFiles('**/package.json') }}
         restore-keys: |
-          ${{ runner.os }}-modules-${{ hashFiles('package.json') }}
+          ${{ runner.os }}-modules-${{ hashFiles('**/package.json') }}
           ${{ runner.os }}-modules-
     - name: Update NPM
       if: steps.determine-node-npm-version.outputs.npm-version != ''
