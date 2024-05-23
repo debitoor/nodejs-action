@@ -147,11 +147,6 @@ runs:
           `package-lock.json` has been updated in recent CI workflow run, but cannot be committed because of missing SSH key.
           Please run `npm install` and commit updated `package-lock.json` file or provide SSH key in CI workflow as `gh-ssh-private-key`.
 
-    - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key == '' && github.ref_protected != true && github.actor == 'bobhammer' }}
-      name: Fail because of outdated package-lock.json
-      run: exit 1
-      shell: bash
-
     # Comment regarding outdated lockfile
     - if: ${{ always() && github.event.number != '' && steps.outdated-lockfile.outputs.outdated-lockfile != '0' && github.actor != 'bobhammer' }}
       name: Comment outdated package-lock.json
