@@ -36,7 +36,7 @@ runs:
         echo "::error::debitoor-npm-token is empty. Please set it in Actions and/or Dependabot secrets"
         exit 1
       shell: bash
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4.2.0
       with:
         ref: ${{ github.head_ref }}
         ssh-key: ${{ inputs.gh-ssh-private-key }}
@@ -51,11 +51,11 @@ runs:
         echo "npm-postinstall=${NPM_POSTINSTALL/null/}" >> $GITHUB_OUTPUT
       shell: bash
     - name: Use Node.js
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@0a44ba7841725637a19e28fa30b79a866c81b0a6 # v4.0.4
       with:
         node-version: ${{ steps.determine-node-npm-version.outputs.node-version }}
         # cache: 'npm' # This throws errors when package-lock.json is not in repo - use manual setup below until package-lock.json will be used everywhere
-    - uses: actions/cache@v3
+    - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4.0.2
       id: cache-node-modules
       with:
         path: |
@@ -90,7 +90,7 @@ runs:
       shell: bash
     - name: Install SSH Key
       if: inputs.gh-ssh-private-key != ''
-      uses: shimataro/ssh-key-action@v2
+      uses: shimataro/ssh-key-action@d4fffb50872869abe2d9a9098a6d9c5aa7d16be4 # v2.7.0
       with:
         key: ${{ inputs.gh-ssh-private-key }} 
         known_hosts: ${{ inputs.gh-ssh-known-hosts }}
@@ -131,7 +131,7 @@ runs:
 
     # Commit package-lock.json if it has been updated (only for Bob's PRs) AND SSH key was provided (so PR checks can be triggered again)
     - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key != '' && github.ref_protected != true && github.actor == 'bobhammer' }}
-      uses: stefanzweifel/git-auto-commit-action@v4
+      uses: stefanzweifel/git-auto-commit-action@8621497c8c39c72f3e2a999a26b4ca1b5058a842 # v5.0.1
       with:
         commit_message: Updated package-lock.json
         file_pattern: "package-lock.json"
@@ -140,7 +140,7 @@ runs:
     # Comment regarding updated lockfile when SSH key is not provided
     - if: ${{ steps.package-lock-status.outputs.package-changed == '1' && inputs.gh-ssh-private-key == '' && github.ref_protected != true && github.actor == 'bobhammer' }}
       name: Comment updated package-lock.json
-      uses: peter-evans/create-or-update-comment@v2
+      uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v.4.0.0
       with:
         issue-number: ${{ github.event.number }}
         body: |
@@ -150,7 +150,7 @@ runs:
     # Comment regarding outdated lockfile
     - if: ${{ always() && github.event.number != '' && steps.outdated-lockfile.outputs.outdated-lockfile != '0' && github.actor != 'bobhammer' }}
       name: Comment outdated package-lock.json
-      uses: peter-evans/create-or-update-comment@v2
+      uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v.4.0.0
       with:
         issue-number: ${{ github.event.number }}
         body: |
