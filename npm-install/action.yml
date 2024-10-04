@@ -164,6 +164,7 @@ runs:
       shell: bash
       env:
         NODE_VERSION: ${{ steps.determine-node-npm-version.outputs.node-version }}
+      # bash can only compare integers, use 'bc' to compare versions like 18.20. Also remove '.x' wildcards that we commonly use in version
       run: echo outdated-node-version=$(echo "${NODE_VERSION//.x/} < 20" | bc) >> $GITHUB_OUTPUT
 
     - if: always() && fromJSON(steps.determine-old-node-version.outputs.outdated-node-version)
