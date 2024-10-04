@@ -156,3 +156,13 @@ runs:
         body: |
           `package-lock.json` is not in sync with `package.json`. 
           Please commit updated `package-lock.json` file (otherwise deployment will fail).
+
+    # Comment old NodeJs version
+    - if: always() && fromJSON(steps.determine-node-npm-version.outputs.node-version) < 20
+      name: Comment old NodeJs version
+      uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v.4.0.0
+      with:
+        issue-number: ${{ github.event.number }}
+        body: |
+          The node version specified in `package.json` is ${{ steps.determine-node-npm-version.outputs.node-version }}. 
+          Please update it. Don't forget about Dockerfile update if this is a service
