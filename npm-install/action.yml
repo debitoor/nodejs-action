@@ -158,7 +158,7 @@ runs:
           Please commit updated `package-lock.json` file (otherwise deployment will fail).
 
     # Comment old NodeJs version
-    - if: always() && steps.determine-node-npm-version.outputs.node-version < 20.0.x
+    - if: always() && steps.determine-node-npm-version.outputs.node-version < 20.0.0
       name: Comment old NodeJs version
       uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v.4.0.0
       with:
