@@ -158,7 +158,15 @@ runs:
           Please commit updated `package-lock.json` file (otherwise deployment will fail).
 
     # Comment old NodeJs version
-    - if: always() && fromJSON(steps.determine-node-npm-version.outputs.node-version) < 20
+    - if: always()
+      id: determine-old-node-version
+      name: Determine old NodeJs version
+      shell: bash
+      env:
+        NODE_VERSION: ${{ steps.determine-node-npm-version.outputs.node-version }}
+      run: echo outdated-node-version=$(echo "${NODE_VERSION//.x/} < 20" | bc) >> $GITHUB_OUTPUT
+
+    - if: always() && fromJSON(steps.determine-old-node-version.outputs.outdated-node-version)
       name: Comment old NodeJs version
       uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v.4.0.0
       with:
