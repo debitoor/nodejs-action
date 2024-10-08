@@ -156,3 +156,23 @@ runs:
         body: |
           `package-lock.json` is not in sync with `package.json`. 
           Please commit updated `package-lock.json` file (otherwise deployment will fail).
+
+    # Comment old NodeJs version
+    - if: always()
+      id: determine-old-node-version
+      name: Determine old NodeJs version
+      shell: bash
+      env:
+        NODE_VERSION: ${{ steps.determine-node-npm-version.outputs.node-version }}
+      # bash can only compare integers, use 'bc' to compare versions like 18.20. Also remove '.x' wildcards that we commonly use in version
+      run: echo outdated-node-version=$(echo "${NODE_VERSION//.x/} < 18" | bc) >> $GITHUB_OUTPUT
+
+    - if: always() && fromJSON(steps.determine-old-node-version.outputs.outdated-node-version)
+      name: Comment old NodeJs version
+      uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v.4.0.0
+      with:
+        issue-number: ${{ github.event.number }}
+        edit-mode: replace
+        body: |
+          The node version `${{ steps.determine-node-npm-version.outputs.node-version }}` specified in `package.json` is not supported anymore or close to end of support and should be bumped to `>= 18`. 
+          Note: Remember to update node version in Dockerfile too.
