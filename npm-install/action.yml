@@ -174,5 +174,5 @@ runs:
         issue-number: ${{ github.event.number }}
         edit-mode: replace
         body: |
-          The node version "${{ steps.determine-node-npm-version.outputs.node-version }}" specified in `package.json` is <placeholder - insert better text about dropped LTS support> and should be bumped to v20 minimum. 
+          The node version "${{ steps.determine-node-npm-version.outputs.node-version }}" specified in `package.json` is not supported anymore or close to end of support and should be bumped to `>= 18`. 
           Note: Remember to update node version in Dockerfile too.
