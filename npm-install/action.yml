@@ -168,9 +168,19 @@ runs:
       run: echo outdated-node-version=$(echo "${NODE_VERSION//.*/} < 18" | bc) >> $GITHUB_OUTPUT
 
     - if: always() && fromJSON(steps.determine-old-node-version.outputs.outdated-node-version)
+      name: Find old NodeJs version comment
+      uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
+      id: find-old-node-version-comment
+      with:
+        issue-number: ${{ github.event.pull_request.number }}
+        comment-author: 'github-actions[bot]'
+        body-includes: is not supported anymore or close to end of support and should be bumped
+
+    - if: always() && fromJSON(steps.determine-old-node-version.outputs.outdated-node-version)
       name: Comment old NodeJs version
       uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v.4.0.0
       with:
+        comment-id: ${{ steps.find-old-node-version-comment.outputs.comment-id }}
         issue-number: ${{ github.event.number }}
         edit-mode: replace
         body: |
