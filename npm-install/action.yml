@@ -167,7 +167,7 @@ runs:
       # remove anything after the first dot from NODE_VERSION and then compare it. 'bc' returns 1 if condition is true
       run: echo outdated-node-version=$(echo "${NODE_VERSION//.*/} < 18" | bc) >> $GITHUB_OUTPUT
 
-    - if: always() && fromJSON(steps.determine-old-node-version.outputs.outdated-node-version)
+    - if: always() && github.event.number != '' && fromJSON(steps.determine-old-node-version.outputs.outdated-node-version)
       name: Find old NodeJs version comment
       uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3.1.0
       id: find-old-node-version-comment
@@ -176,7 +176,7 @@ runs:
         comment-author: 'github-actions[bot]'
         body-includes: is not supported anymore or close to end of support and should be bumped
 
-    - if: always() && fromJSON(steps.determine-old-node-version.outputs.outdated-node-version)
+    - if: always() && github.event.number != '' && fromJSON(steps.determine-old-node-version.outputs.outdated-node-version)
       name: Comment old NodeJs version
       uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v.4.0.0
       with:
