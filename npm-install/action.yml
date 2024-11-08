@@ -78,15 +78,15 @@ runs:
     - name: Configure Debitoor token
       env:
         debitoor_npm_token: ${{ inputs.debitoor-npm-token }}
-      run: echo "//registry.npmjs.org/:_authToken=${debitoor_npm_token}" > .npmrc
+      run: echo "//registry.npmjs.org/:_authToken=${debitoor_npm_token}" > ~/.npmrc
       shell: bash
     - name: Configure SumUp token
       if: inputs.sumup-npm-token != ''
       env:
         sumup_npm_token: ${{ inputs.sumup-npm-token }}
       run: |
-        echo "@sumup:registry=https://npm.pkg.github.com" >> .npmrc
-        echo "//npm.pkg.github.com/:_authToken=${sumup_npm_token}" >> .npmrc
+        echo "@sumup:registry=https://npm.pkg.github.com" >> ~/.npmrc
+        echo "//npm.pkg.github.com/:_authToken=${sumup_npm_token}" >> ~/.npmrc
       shell: bash
     - name: Install SSH Key
       if: inputs.gh-ssh-private-key != ''
